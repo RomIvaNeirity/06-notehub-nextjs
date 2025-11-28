@@ -3,8 +3,8 @@ import type { FormikHelpers } from "formik";
 import * as Yup from "yup";
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { NoteFormValues } from "../../types/noteFormValues";
-import { createNote } from "../../services/noteService";
+import type { NoteFormValues } from "../../types/note";
+import { createNote } from "@/lib/api";
 
 interface NoteFormProps {
   onCancel: () => void;
