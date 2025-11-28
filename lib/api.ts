@@ -18,9 +18,9 @@ export async function fetchNotes(
         perPage: 12,
         search: search || undefined,
       },
-      /* headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
-      }, */
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+      },
     }
   );
   console.log("DATA:", response.data);
@@ -32,9 +32,9 @@ export async function createNote(noteValues: NoteFormValues): Promise<Note> {
     "https://notehub-public.goit.study/api/notes/",
     noteValues,
     {
-      /* headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
-      }, */
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+      },
     }
   );
 
@@ -46,11 +46,23 @@ export async function deleteNote(id: string): Promise<Note> {
   const response = await axios.delete<Note>(
     `https://notehub-public.goit.study/api/notes/${id}`,
     {
-      /*  headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
-      }, */
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+      },
     }
   );
   console.log(response.data);
+  return response.data;
+}
+
+export async function fetchNoteById(id: string): Promise<Note> {
+  const response = await axios.get<Note>(
+    `https://notehub-public.goit.study/api/notes/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+      },
+    }
+  );
   return response.data;
 }
