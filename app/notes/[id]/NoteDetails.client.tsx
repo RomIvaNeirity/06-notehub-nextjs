@@ -7,11 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api";
 
 export default function NoteDetailsClient() {
-  const { id } = useParams(); // <-- отримуємо динамічний id тут!
+  const { id } = useParams();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["note", id],
     queryFn: () => fetchNoteById(id as string),
+    refetchOnMount: false,
   });
 
   if (isLoading) return <p>Loading, please wait...</p>;
@@ -21,10 +22,11 @@ export default function NoteDetailsClient() {
     <div className={css.container}>
       <div className={css.item}>
         <div className={css.header}>
-          <h2>Note title</h2>
+          <h2>{data.title}</h2>
         </div>
-        <p className={css.content}>Note content</p>
-        <p className={css.date}>Created date</p>
+        <p className={css.content}>{data.content}</p>
+        <p className={css.date}>Created date: {data.createdAt}</p>
+        <p className={css.tag}>{data.tag}</p>
       </div>
     </div>
   );

@@ -1,9 +1,18 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import css from "@/app/page.module.css";
+import { useState, useEffect } from "react";
+import { useDebounce } from "use-debounce";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
 import NoteList from "@/components/NoteList/NoteList";
 import type { Note } from "@/types/note";
+import toast, { Toaster } from "react-hot-toast";
+
+import SearchBox from "@/components/SearchBox/SearchBox";
+import Pagination from "@/components/Pagination/Pagination";
+import Modal from "@/components/Modal/Modal";
+import NoteForm from "@/components/NoteForm/NoteForm";
 
 interface FetchNotesResponse {
   notes: Note[];
@@ -11,12 +20,60 @@ interface FetchNotesResponse {
 }
 
 export default function NotesClient() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+
   const { data } = useQuery<FetchNotesResponse>({
-    queryKey: ["notes"],
-    queryFn: () => fetchNotes(1, ""),
+    queryKey: ["notes", currentPage, debouncedSearch],
+    queryFn: () => fetchNotes(currentPage + 1, debouncedSearch),
+    placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (data && data.notes.length === 0) {
+      toast.error("No notes found.");
+    }
+  }, [data]);
 
   if (!data) return null;
 
-  return <NoteList notes={data.notes} />;
+  return (
+    <div className={css.app}>
+      <div className={css.toolbar}>
+        {<SearchBox value={search} onChange={setSearch} />}
+        {data && data.totalPages > 1 && (
+          <Pagination
+            pageCount={data.totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        )}
+        {
+          <button className={css.button} onClick={() => setModalOpen(true)}>
+            Create note +
+          </button>
+        }
+        {modalOpen && (
+          <Modal
+            onClose={() => setModalOpen(false)}
+            children={
+              <NoteForm
+                onCancel={() => setModalOpen(false)}
+                onSuccess={() => setModalOpen(false)}
+              />
+            }
+          />
+        )}
+      </div>
+      {/* {data && <NoteList notes={data.notes} />} */}
+      <NoteList notes={data.notes} />
+      <Toaster />
+    </div>
+  );
 }
