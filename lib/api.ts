@@ -15,7 +15,7 @@ export async function fetchNotes(
     {
       params: {
         page,
-        perPage: 12,
+        perPage: 10,
         search: search || undefined,
       },
       headers: {

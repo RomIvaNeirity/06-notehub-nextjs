@@ -20,19 +20,20 @@ interface FetchNotesResponse {
 }
 
 export default function NotesClient() {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
+
   const [debouncedSearch] = useDebounce(search, 300);
 
   const { data } = useQuery<FetchNotesResponse>({
     queryKey: ["notes", currentPage, debouncedSearch],
-    queryFn: () => fetchNotes(currentPage + 1, debouncedSearch),
+    queryFn: () => fetchNotes(currentPage, debouncedSearch),
     placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
-    setCurrentPage(0);
+    setCurrentPage(1);
   }, [debouncedSearch]);
 
   useEffect(() => {
@@ -46,7 +47,8 @@ export default function NotesClient() {
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
-        {<SearchBox value={search} onChange={setSearch} />}
+        <SearchBox onChange={setSearch} />
+
         {data && data.totalPages > 1 && (
           <Pagination
             pageCount={data.totalPages}
@@ -54,25 +56,23 @@ export default function NotesClient() {
             onPageChange={setCurrentPage}
           />
         )}
-        {
-          <button className={css.button} onClick={() => setModalOpen(true)}>
-            Create note +
-          </button>
-        }
+
+        <button className={css.button} onClick={() => setModalOpen(true)}>
+          Create note +
+        </button>
+
         {modalOpen && (
-          <Modal
-            onClose={() => setModalOpen(false)}
-            children={
-              <NoteForm
-                onCancel={() => setModalOpen(false)}
-                onSuccess={() => setModalOpen(false)}
-              />
-            }
-          />
+          <Modal onClose={() => setModalOpen(false)}>
+            <NoteForm
+              onCancel={() => setModalOpen(false)}
+              onSuccess={() => setModalOpen(false)}
+            />
+          </Modal>
         )}
       </div>
-      {/* {data && <NoteList notes={data.notes} />} */}
-      <NoteList notes={data.notes} />
+
+      {data.notes.length > 0 && <NoteList notes={data.notes} />}
+
       <Toaster />
     </div>
   );
